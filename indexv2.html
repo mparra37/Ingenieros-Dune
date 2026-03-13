@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Oráculo de Arrakis — Tec de Monterrey</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Crimson+Pro:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --sand:#c8a96e;--sand2:#e8c87a;--rust:#8b4513;
+  --deep:#1a0f00;--dark:#0d0800;
+  --spice:#ff6b00;--spice2:#ff9933;--text:#e8d5b0;
+}
+html,body{width:100%;height:100%;background:var(--dark);font-family:'Crimson Pro',serif;color:var(--text);overflow-x:hidden}
+#bg-canvas{position:fixed;inset:0;z-index:0;pointer-events:none}
+#app{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:1.2rem 1rem 6rem}
+
+/* HEADER */
+.header{text-align:center;margin-bottom:1rem}
+.tec-badge{display:inline-flex;align-items:center;gap:9px;border:1px solid rgba(200,169,110,.35);border-radius:3px;padding:5px 14px;background:rgba(26,15,0,.7);margin-bottom:8px}
+.tec-badge span{font-family:'Cinzel',serif;font-size:10px;color:var(--sand);letter-spacing:.22em;text-transform:uppercase}
+.main-title{font-family:'Cinzel',serif;font-size:clamp(18px,3.5vw,30px);font-weight:900;color:var(--sand2);letter-spacing:.07em;line-height:1.1;text-shadow:0 0 30px rgba(200,169,110,.4)}
+.main-title em{color:var(--spice2);font-style:normal;display:block;font-size:.62em;font-weight:400;letter-spacing:.18em;margin-top:3px}
+
+/* CAMERA */
+#cam-wrap{position:relative;width:100%;max-width:560px;aspect-ratio:4/3;border-radius:2px;overflow:hidden;background:#0a0500;border:1px solid rgba(200,169,110,.3);box-shadow:0 0 0 1px rgba(200,169,110,.08),0 0 60px rgba(139,69,19,.3),inset 0 0 80px rgba(0,0,0,.5)}
+#video{width:100%;height:100%;object-fit:cover;display:block;transform:scaleX(-1);filter:sepia(.2) saturate(.85) contrast(1.1)}
+#hud{position:absolute;inset:0;pointer-events:none}
+.oc{position:absolute;width:32px;height:32px}
+.oc svg{width:100%;height:100%}
+.oc.tl{top:8px;left:8px}.oc.tr{top:8px;right:8px;transform:scaleX(-1)}
+.oc.bl{bottom:8px;left:8px;transform:scaleY(-1)}.oc.br{bottom:8px;right:8px;transform:scale(-1,-1)}
+#scan-line{position:absolute;left:0;right:0;height:1.5px;background:linear-gradient(90deg,transparent,rgba(200,169,110,.05) 5%,rgba(200,169,110,.6) 40%,rgba(255,153,51,.9) 50%,rgba(200,169,110,.6) 60%,rgba(200,169,110,.05) 95%,transparent);animation:scanMove 4s ease-in-out infinite;opacity:.8}
+@keyframes scanMove{0%{top:3%;opacity:.8}50%{top:94%;opacity:.6}100%{top:3%;opacity:.8}}
+#hud-top{position:absolute;top:10px;left:50%;transform:translateX(-50%);background:rgba(10,5,0,.85);border:1px solid rgba(200,169,110,.3);border-radius:2px;padding:3px 12px;font-family:'Cinzel',serif;font-size:9px;letter-spacing:.2em;color:var(--sand);text-transform:uppercase;white-space:nowrap;transition:color .4s}
+#dust{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.dust-p{position:absolute;border-radius:50%;background:rgba(200,169,110,.6);animation:dustFloat linear infinite}
+@keyframes dustFloat{0%{opacity:0;transform:translateY(0) translateX(0)}20%{opacity:1}80%{opacity:.5}100%{opacity:0;transform:translateY(-120px) translateX(18px)}}
+#det-flash{position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(255,153,51,.25),transparent 70%);opacity:0;pointer-events:none;transition:opacity .3s}
+#det-flash.show{opacity:1}
+#face-ring{position:absolute;border:1.5px solid rgba(255,153,51,.7);border-radius:50%;display:none;box-shadow:0 0 12px rgba(255,107,0,.4),inset 0 0 12px rgba(255,107,0,.1);animation:ringPulse 2s ease-in-out infinite}
+@keyframes ringPulse{0%,100%{box-shadow:0 0 8px rgba(255,107,0,.4)}50%{box-shadow:0 0 22px rgba(255,153,51,.8)}}
+#detect-msg{position:absolute;bottom:0;left:0;right:0;padding:14px 16px 12px;background:linear-gradient(0deg,rgba(10,5,0,.97) 50%,transparent);display:flex;flex-direction:column;align-items:center;gap:5px;opacity:0;transform:translateY(10px);transition:opacity .6s,transform .6s;pointer-events:none}
+#detect-msg.show{opacity:1;transform:translateY(0)}
+.detect-label{font-family:'Cinzel',serif;font-size:9px;letter-spacing:.22em;color:var(--spice);text-transform:uppercase}
+.detect-text{font-family:'Cinzel',serif;font-size:clamp(12px,2vw,16px);font-weight:600;color:var(--sand2);text-align:center;line-height:1.3;text-shadow:0 0 16px rgba(200,169,110,.5)}
+#question-panel{position:absolute;bottom:0;left:0;right:0;padding:12px 16px 14px;background:linear-gradient(0deg,rgba(10,5,0,.98) 55%,transparent);display:flex;flex-direction:column;align-items:center;gap:8px;opacity:0;transform:translateY(10px);transition:opacity .5s,transform .5s;pointer-events:none}
+#question-panel.show{opacity:1;transform:translateY(0)}
+.question-text{font-family:'Crimson Pro',serif;font-size:clamp(12px,1.8vw,14px);font-style:italic;color:var(--sand);text-align:center;line-height:1.5;letter-spacing:.02em}
+.q-pulse{width:7px;height:7px;border-radius:50%;background:var(--spice2);animation:qPulse 1.2s ease-in-out infinite}
+@keyframes qPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.7);opacity:.4}}
+#no-cam-msg{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:2rem;text-align:center;font-family:'Cinzel',serif;font-size:11px;letter-spacing:.1em;color:rgba(200,169,110,.4)}
+
+/* STATUS */
+#status-row{margin-top:8px;display:flex;align-items:center;gap:8px;font-family:'Cinzel',serif;font-size:9px;letter-spacing:.12em;color:rgba(200,169,110,.4);text-transform:uppercase}
+#status-dot{width:6px;height:6px;border-radius:50%;background:rgba(200,169,110,.2);flex-shrink:0}
+#status-dot.on{background:var(--spice2);box-shadow:0 0 6px var(--spice);animation:dotP 2s ease-in-out infinite}
+@keyframes dotP{0%,100%{opacity:1}50%{opacity:.3}}
+#start-btn{margin-top:10px;background:rgba(26,15,0,.88);border:1px solid rgba(200,169,110,.4);border-radius:3px;padding:11px 28px;font-family:'Cinzel',serif;font-size:12px;font-weight:700;letter-spacing:.18em;color:var(--sand);text-transform:uppercase;cursor:pointer;transition:all .25s}
+#start-btn:hover{border-color:var(--spice2);color:var(--sand2);box-shadow:0 0 18px rgba(255,107,0,.2)}
+
+/* ══ RITUAL OVERLAY ══ */
+#ritual-overlay{position:fixed;inset:0;z-index:200;background:rgba(5,2,0,0);display:flex;align-items:center;justify-content:center;pointer-events:none;transition:background .7s}
+#ritual-overlay.show{background:rgba(5,2,0,.97);pointer-events:auto}
+#ritual-inner{width:100%;max-width:420px;padding:2rem 1.5rem;display:flex;flex-direction:column;align-items:center;gap:4px;opacity:0;transition:opacity .5s .25s}
+#ritual-overlay.show #ritual-inner{opacity:1}
+#worm-canvas{width:200px;height:200px;margin-bottom:1rem}
+.ritual-phase{font-family:'Cinzel',serif;font-size:10px;letter-spacing:.25em;color:var(--spice);text-transform:uppercase;text-align:center;min-height:20px;transition:opacity .4s}
+.ritual-line{width:180px;height:1px;background:linear-gradient(90deg,transparent,var(--sand),transparent);margin:10px auto}
+#ritual-text{font-family:'Crimson Pro',serif;font-size:clamp(13px,2.2vw,15px);font-style:italic;color:rgba(232,213,176,.7);text-align:center;line-height:1.65;min-height:72px;letter-spacing:.02em;transition:opacity .5s;white-space:pre-line}
+
+/* ══ RESULT OVERLAY ══ */
+#result-overlay{position:fixed;inset:0;z-index:300;background:rgba(10,5,0,0);display:flex;align-items:center;justify-content:center;padding:1rem;pointer-events:none;transition:background .5s}
+#result-overlay.show{background:rgba(10,5,0,.93);pointer-events:auto}
+#result-card{width:100%;max-width:480px;background:linear-gradient(160deg,rgba(26,15,0,.98),rgba(10,5,0,.99));border:1px solid rgba(200,169,110,.4);border-radius:4px;padding:28px 24px;text-align:center;transform:scale(.88) translateY(24px);opacity:0;transition:transform .65s cubic-bezier(.2,.8,.2,1),opacity .5s;position:relative;overflow:hidden}
+#result-overlay.show #result-card{transform:scale(1) translateY(0);opacity:1}
+#result-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--sand),var(--spice2),var(--sand),transparent)}
+#result-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--sand),var(--spice2),var(--sand),transparent)}
+.card-glow{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(255,107,0,.07),transparent 65%);pointer-events:none}
+.res-eyebrow{font-family:'Cinzel',serif;font-size:9px;letter-spacing:.28em;color:var(--spice);text-transform:uppercase;margin-bottom:10px}
+.res-prophecy{font-family:'Cinzel',serif;font-size:clamp(20px,4.5vw,32px);font-weight:900;color:var(--sand2);line-height:1.15;text-shadow:0 0 30px rgba(200,169,110,.5);margin-bottom:5px;white-space:pre-line}
+.res-career{font-family:'Cinzel',serif;font-size:clamp(12px,2.2vw,15px);font-weight:600;color:var(--spice2);letter-spacing:.06em;margin-bottom:16px;line-height:1.3;text-shadow:0 0 18px rgba(255,107,0,.4)}
+.res-divider{width:80px;height:1px;background:linear-gradient(90deg,transparent,var(--sand),transparent);margin:0 auto 14px}
+.res-quote{font-family:'Crimson Pro',serif;font-size:clamp(13px,2vw,15px);font-style:italic;font-weight:300;color:rgba(232,213,176,.8);line-height:1.65;margin-bottom:18px}
+.res-tec{font-family:'Cinzel',serif;font-size:9px;letter-spacing:.2em;color:rgba(200,169,110,.4);text-transform:uppercase;margin-bottom:20px}
+.close-btn{background:transparent;border:1px solid rgba(200,169,110,.4);border-radius:2px;padding:9px 26px;font-family:'Cinzel',serif;font-size:10px;font-weight:600;letter-spacing:.18em;color:var(--sand);text-transform:uppercase;cursor:pointer;transition:all .2s}
+.close-btn:hover{border-color:var(--spice2);color:var(--sand2);background:rgba(139,69,19,.3)}
+
+/* BOTTOM BAR — always visible */
+#bottom-bar{position:fixed;bottom:0;left:0;right:0;z-index:50;display:flex;justify-content:center;padding:12px 1rem 18px;background:linear-gradient(0deg,rgba(5,2,0,.97),rgba(5,2,0,.7),transparent)}
+#vision-btn{background:rgba(20,10,0,.92);border:1px solid rgba(200,169,110,.5);border-radius:3px;padding:12px 32px;font-family:'Cinzel',serif;font-size:12px;font-weight:700;letter-spacing:.2em;color:var(--sand2);text-transform:uppercase;cursor:pointer;transition:all .25s;position:relative;overflow:hidden;display:flex;align-items:center;gap:10px}
+#vision-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,153,51,.08),transparent);opacity:0;transition:opacity .3s}
+#vision-btn:hover{border-color:var(--spice2);box-shadow:0 0 22px rgba(255,107,0,.35);color:#fff}
+#vision-btn:hover::before{opacity:1}
+#vision-btn:active{transform:scale(.97)}
+.eye-icon{font-size:16px;display:inline-block;animation:eyeBlink 5s ease-in-out infinite}
+@keyframes eyeBlink{0%,88%,100%{opacity:1;transform:scaleY(1)}93%{opacity:.05;transform:scaleY(.1)}}
+
+/* AUDIO BTN */
+#audio-btn{position:fixed;top:10px;right:10px;z-index:60;background:rgba(10,5,0,.82);border:1px solid rgba(200,169,110,.25);border-radius:2px;padding:5px 10px;display:flex;align-items:center;gap:6px;cursor:pointer;transition:all .2s;font-family:'Cinzel',serif;font-size:9px;letter-spacing:.12em;color:rgba(200,169,110,.5)}
+#audio-btn:hover{border-color:rgba(200,169,110,.5);color:var(--sand)}
+.abar{width:3px;border-radius:1px;background:var(--sand);animation:barA .8s ease-in-out infinite}
+.abar:nth-child(1){height:4px;animation-delay:0s}.abar:nth-child(2){height:10px;animation-delay:.15s}
+.abar:nth-child(3){height:7px;animation-delay:.3s}.abar:nth-child(4){height:12px;animation-delay:.1s}.abar:nth-child(5){height:5px;animation-delay:.25s}
+@keyframes barA{0%,100%{transform:scaleY(.35)}50%{transform:scaleY(1)}}
+.abar.paused{animation:none;transform:scaleY(.3)}
+</style>
+</head>
+<body>
+
+<canvas id="bg-canvas"></canvas>
+
+<div id="app">
+  <div class="header">
+    <div class="tec-badge">
+      <svg width="20" height="20" viewBox="0 0 28 28"><rect width="28" height="28" rx="2" fill="#1a0f00"/><text x="14" y="20" font-family="Arial" font-weight="900" font-size="12" fill="#c8a96e" text-anchor="middle">TEC</text></svg>
+      <span>Tecnológico de Monterrey</span>
+    </div>
+    <div class="main-title">El Oráculo de Arrakis<em>Tu destino como ingeniero/a</em></div>
+  </div>
+
+  <div id="cam-wrap">
+    <video id="video" autoplay playsinline muted></video>
+    <div id="hud">
+      <div class="oc tl"><svg viewBox="0 0 32 32" fill="none"><path d="M2 16L2 2L16 2" stroke="#c8a96e" stroke-width="1.5" opacity=".7"/><circle cx="2" cy="2" r="1.8" fill="#ff9933" opacity=".7"/></svg></div>
+      <div class="oc tr"><svg viewBox="0 0 32 32" fill="none"><path d="M2 16L2 2L16 2" stroke="#c8a96e" stroke-width="1.5" opacity=".7"/><circle cx="2" cy="2" r="1.8" fill="#ff9933" opacity=".7"/></svg></div>
+      <div class="oc bl"><svg viewBox="0 0 32 32" fill="none"><path d="M2 16L2 2L16 2" stroke="#c8a96e" stroke-width="1.5" opacity=".7"/><circle cx="2" cy="2" r="1.8" fill="#ff9933" opacity=".7"/></svg></div>
+      <div class="oc br"><svg viewBox="0 0 32 32" fill="none"><path d="M2 16L2 2L16 2" stroke="#c8a96e" stroke-width="1.5" opacity=".7"/><circle cx="2" cy="2" r="1.8" fill="#ff9933" opacity=".7"/></svg></div>
+      <div id="scan-line"></div>
+      <div id="dust"></div>
+      <div id="det-flash"></div>
+      <div id="face-ring"></div>
+      <div id="hud-top">Aguardando al elegido...</div>
+      <div id="detect-msg">
+        <div class="detect-label">▸ señal del oráculo ◂</div>
+        <div class="detect-text">He detectado la presencia<br>de un futuro ingeniero/a</div>
+      </div>
+      <div id="question-panel">
+        <div class="question-text">"El desierto guarda el secreto de tu destino.<br>¿Deseas que el Oráculo revele qué tipo de ingeniero/a eres?"</div>
+        <div class="q-pulse"></div>
+      </div>
+    </div>
+    <div id="no-cam-msg">
+      <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#c8a96e" stroke-width="1"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+      <div>El oráculo requiere tu presencia.<br>Permite acceso a la cámara.</div>
+    </div>
+  </div>
+
+  <div id="status-row"><div id="status-dot"></div><span id="status-text">Oráculo inactivo</span></div>
+  <button id="start-btn" onclick="startCamera()">⟁ Despertar el Oráculo</button>
+</div>
+
+<!-- RITUAL OVERLAY -->
+<div id="ritual-overlay">
+  <div id="ritual-inner">
+    <canvas id="worm-canvas" width="400" height="400"></canvas>
+    <div class="ritual-phase" id="ritual-phase">Consultando las arenas...</div>
+    <div class="ritual-line"></div>
+    <div id="ritual-text"></div>
+  </div>
+</div>
+
+<!-- RESULT OVERLAY -->
+<div id="result-overlay">
+  <div id="result-card">
+    <div class="card-glow"></div>
+    <div class="res-eyebrow">▸ La profecía ha sido revelada ◂</div>
+    <div class="res-prophecy" id="res-prophecy"></div>
+    <div class="res-career" id="res-career"></div>
+    <div class="res-divider"></div>
+    <div class="res-quote" id="res-quote"></div>
+    <div class="res-tec">Tecnológico de Monterrey · Arrakis Campus</div>
+    <button class="close-btn" onclick="closeResult()">↩ Volver al desierto</button>
+  </div>
+</div>
+
+<!-- PERSISTENT BOTTOM BAR -->
+<div id="bottom-bar">
+  <button id="vision-btn" onclick="invokeOracle()">
+    <span class="eye-icon">👁</span>
+    Consultar mi visión
+  </button>
+</div>
+
+<!-- AUDIO -->
+<div id="audio-btn" onclick="toggleAudio()">
+  <div style="display:flex;align-items:flex-end;gap:2px;height:14px">
+    <div class="abar paused"></div><div class="abar paused"></div>
+    <div class="abar paused"></div><div class="abar paused"></div>
+    <div class="abar paused"></div>
+  </div>
+  <span id="audio-label">♪ Música</span>
+</div>
+
+<script>
+/* ══════════════════════ BACKGROUND ══════════════════════ */
+const bgC=document.getElementById('bg-canvas'),bgX=bgC.getContext('2d');
+function rbg(){bgC.width=window.innerWidth;bgC.height=window.innerHeight;}
+rbg();window.addEventListener('resize',rbg);
+const sandP=Array.from({length:90},()=>({x:Math.random()*3000,y:Math.random()*1500,r:.5+Math.random()*1.5,sp:.08+Math.random()*.3,op:.04+Math.random()*.16,w:Math.random()*Math.PI*2}));
+let bgT=0;
+function drawBg(){
+  const W=bgC.width,H=bgC.height;
+  bgX.clearRect(0,0,W,H); bgT+=.003;
+  const sky=bgX.createLinearGradient(0,0,0,H);
+  sky.addColorStop(0,'#010408');sky.addColorStop(.3,'#080600');sky.addColorStop(.65,'#0f0800');sky.addColorStop(1,'#180b00');
+  bgX.fillStyle=sky;bgX.fillRect(0,0,W,H);
+  [[W*.2,H*.14,13,'.06'],[W*.65,H*.09,8,'.04']].forEach(([sx,sy,sr,a])=>{
+    const g=bgX.createRadialGradient(sx,sy,0,sx,sy,sr*10);
+    g.addColorStop(0,`rgba(255,170,50,${parseFloat(a)*2.2})`);g.addColorStop(.3,`rgba(255,140,30,${a})`);g.addColorStop(1,'transparent');
+    bgX.fillStyle=g;bgX.beginPath();bgX.arc(sx,sy,sr*10,0,Math.PI*2);bgX.fill();
+    bgX.fillStyle='rgba(255,230,130,.65)';bgX.beginPath();bgX.arc(sx,sy,sr,0,Math.PI*2);bgX.fill();
+  });
+  function dune(pts,col){
+    bgX.fillStyle=col;bgX.beginPath();bgX.moveTo(0,H);
+    pts.forEach(([rx,ry],i)=>{
+      const x=rx*W,y=ry*H+Math.sin(bgT+i*.55)*2.2;
+      i===0?bgX.lineTo(x,y):bgX.bezierCurveTo((pts[i-1][0]+rx)/2*W,pts[i-1][1]*H,(pts[i-1][0]+rx)/2*W,y,x,y);
+    });bgX.lineTo(W,H);bgX.fill();
+  }
+  dune([[0,.67],[.1,.55],[.22,.63],[.35,.49],[.48,.6],[.59,.45],[.71,.56],[.83,.46],[.93,.57],[1,.61]],'rgba(16,9,2,.9)');
+  dune([[0,.79],[.14,.69],[.27,.76],[.41,.65],[.53,.73],[.66,.62],[.77,.71],[.89,.67],[1,.73]],'rgba(9,5,0,.95)');
+  const sh=bgX.createLinearGradient(0,H*.63,0,H*.82);
+  sh.addColorStop(0,'transparent');sh.addColorStop(.5,`rgba(255,95,0,${.012+Math.sin(bgT*1.3)*.01})`);sh.addColorStop(1,'transparent');
+  bgX.fillStyle=sh;bgX.fillRect(0,H*.63,W,H*.22);
+  sandP.forEach(p=>{
+    p.y-=p.sp;p.x+=Math.sin(bgT+p.w)*.2;
+    if(p.y<-3){p.y=H+3;p.x=Math.random()*W;}
+    bgX.globalAlpha=p.op*(Math.sin(bgT*2+p.w)*.3+.7);
+    bgX.fillStyle='#c8a96e';bgX.beginPath();bgX.arc(p.x,p.y,p.r,0,Math.PI*2);bgX.fill();
+  });
+  bgX.globalAlpha=1;
+  requestAnimationFrame(drawBg);
+}
+drawBg();
+
+/* ══════════════════════ WORM EYE ══════════════════════ */
+const wc=document.getElementById('worm-canvas'),wx=wc.getContext('2d');
+const WS=400;
+let wT=0,ritualRunning=false,eyeOpenAmount=0,eyeTarget=0;
+
+function drawWormEye(){
+  wx.clearRect(0,0,WS,WS);
+  wT+=ritualRunning?.038:.007;
+  eyeOpenAmount+=(eyeTarget-eyeOpenAmount)*.04;
+  const cx=WS/2,cy=WS/2;
+
+  // Outer dark void
+  const bg=wx.createRadialGradient(cx,cy,30,cx,cy,WS/2);
+  bg.addColorStop(0,'rgba(30,15,2,.0)');bg.addColorStop(.55,'rgba(12,6,0,.5)');bg.addColorStop(1,'rgba(3,1,0,.92)');
+  wx.fillStyle=bg;wx.beginPath();wx.arc(cx,cy,WS/2,0,Math.PI*2);wx.fill();
+
+  // Rune rings — slow orbit
+  const rings=[
+    {r:170,n:14,sz:4.5,spd:.25,col:'rgba(200,169,110,'},
+    {r:148,n:9, sz:5.5,spd:-.4,col:'rgba(255,107,0,'},
+    {r:126,n:18,sz:3,  spd:.7, col:'rgba(200,169,110,'},
+    {r:104,n:6, sz:7,  spd:-.2,col:'rgba(255,180,50,'},
+  ];
+  rings.forEach(rg=>{
+    for(let i=0;i<rg.n;i++){
+      const a=(i/rg.n)*Math.PI*2+wT*rg.spd;
+      const x=cx+Math.cos(a)*rg.r,y=cy+Math.sin(a)*rg.r;
+      const pulse=.3+Math.sin(wT*2.5+i*1.1)*.25;
+      const bright=ritualRunning?Math.min(.95,pulse+.35):pulse*.4;
+      wx.fillStyle=rg.col+bright+')';
+      wx.beginPath();wx.arc(x,y,rg.sz*.5,0,Math.PI*2);wx.fill();
+    }
+  });
+
+  // Hexagon frame
+  wx.save();wx.translate(cx,cy);wx.rotate(wT*.35);
+  wx.strokeStyle=`rgba(200,169,110,${ritualRunning?.3:.08})`;wx.lineWidth=.8;
+  wx.beginPath();
+  for(let i=0;i<6;i++){const a=i/6*Math.PI*2;i===0?wx.moveTo(Math.cos(a)*122,Math.sin(a)*122):wx.lineTo(Math.cos(a)*122,Math.sin(a)*122);}
+  wx.closePath();wx.stroke();wx.restore();
+
+  wx.save();wx.translate(cx,cy);wx.rotate(-wT*.2);
+  wx.strokeStyle=`rgba(255,107,0,${ritualRunning?.18:.04})`;wx.lineWidth=.6;
+  wx.beginPath();
+  for(let i=0;i<8;i++){const a=i/8*Math.PI*2;i===0?wx.moveTo(Math.cos(a)*94,Math.sin(a)*94):wx.lineTo(Math.cos(a)*94,Math.sin(a)*94);}
+  wx.closePath();wx.stroke();wx.restore();
+
+  // Iris glow
+  const irisH=72*eyeOpenAmount,irisW=62;
+  const iG=wx.createRadialGradient(cx,cy,0,cx,cy,irisW);
+  iG.addColorStop(0,`rgba(255,145,15,${ritualRunning?.75:.18})`);
+  iG.addColorStop(.4,`rgba(200,90,0,${ritualRunning?.5:.1})`);
+  iG.addColorStop(1,'rgba(100,35,0,0)');
+  wx.fillStyle=iG;wx.save();wx.translate(cx,cy);
+  wx.beginPath();wx.ellipse(0,0,irisW,Math.max(irisH,1),0,0,Math.PI*2);wx.fill();
+
+  // Iris texture rings
+  if(eyeOpenAmount>.1){
+    for(let r2=15;r2<55;r2+=12){
+      wx.strokeStyle=`rgba(180,80,0,${.12*eyeOpenAmount})`;wx.lineWidth=.5;
+      wx.beginPath();wx.ellipse(0,0,r2,r2*.85*eyeOpenAmount,0,0,Math.PI*2);wx.stroke();
+    }
+  }
+
+  // Pupil — vertical slit
+  const pupH=irisH*.82,pupW=Math.max(1,10*eyeOpenAmount);
+  wx.fillStyle=`rgba(2,1,0,${.7+eyeOpenAmount*.3})`;
+  wx.beginPath();wx.ellipse(0,0,pupW,Math.max(pupH,1),0,0,Math.PI*2);wx.fill();
+
+  // Specula highlight
+  if(eyeOpenAmount>.3){
+    wx.fillStyle=`rgba(255,230,160,${.45*eyeOpenAmount})`;
+    wx.beginPath();wx.ellipse(-13,-irisH*.28,6,2.5,-.5,0,Math.PI*2);wx.fill();
+  }
+
+  // Eyelids — mask top and bottom
+  wx.fillStyle='rgba(2,1,0,1)';
+  const lidGap=irisH+3;
+  // Top lid
+  wx.beginPath();wx.ellipse(0,-(lidGap),irisW+5,Math.max(irisW*1.4-lidGap,1),0,0,Math.PI*2);wx.fill();
+  // Bottom lid
+  wx.beginPath();wx.ellipse(0,lidGap,irisW+5,Math.max(irisW*1.4-lidGap,1),0,0,Math.PI*2);wx.fill();
+
+  wx.restore();
+
+  // Ring glows
+  wx.strokeStyle=`rgba(255,107,0,${ritualRunning?.45:.1})`;wx.lineWidth=1.5;
+  wx.beginPath();wx.arc(cx,cy,88,0,Math.PI*2);wx.stroke();
+  wx.strokeStyle=`rgba(200,169,110,${ritualRunning?.22:.06})`;wx.lineWidth=1;
+  wx.beginPath();wx.arc(cx,cy,108,0,Math.PI*2);wx.stroke();
+
+  // Orbiting spice motes (ritual only)
+  if(ritualRunning){
+    for(let i=0;i<10;i++){
+      const a=i/10*Math.PI*2+wT*.55;
+      const d=80+Math.sin(wT*2.2+i)*14;
+      wx.fillStyle=`rgba(255,153,51,${.25+Math.sin(wT*3+i)*.18})`;
+      wx.beginPath();wx.arc(cx+Math.cos(a)*d,cy+Math.sin(a)*d,2,0,Math.PI*2);wx.fill();
+    }
+  }
+}
+function wormLoop(){drawWormEye();requestAnimationFrame(wormLoop);}
+wormLoop();
+
+/* ══════════════════════ AUDIO ══════════════════════ */
+let audioCtx=null,audioPlaying=false;
+function buildAudio(){
+  audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+  const master=audioCtx.createGain();master.gain.value=.18;master.connect(audioCtx.destination);
+  function drone(f,v,lr=.07){
+    const o=audioCtx.createOscillator(),g=audioCtx.createGain(),fl=audioCtx.createBiquadFilter();
+    o.type='sine';o.frequency.value=f;fl.type='lowpass';fl.frequency.value=260;g.gain.value=v;
+    const lfo=audioCtx.createOscillator(),lg=audioCtx.createGain();
+    lfo.frequency.value=lr;lg.gain.value=f*.016;lfo.connect(lg);lg.connect(o.frequency);lfo.start();
+    o.connect(fl);fl.connect(g);g.connect(master);o.start();
+  }
+  function choir(f,v){
+    const o1=audioCtx.createOscillator(),o2=audioCtx.createOscillator(),g=audioCtx.createGain(),fl=audioCtx.createBiquadFilter();
+    o1.type='triangle';o2.type='triangle';o1.frequency.value=f;o2.frequency.value=f*1.006;
+    fl.type='bandpass';fl.frequency.value=f*2;fl.Q.value=1.4;g.gain.value=v*.5;
+    const lfo=audioCtx.createOscillator(),lg=audioCtx.createGain();
+    lfo.frequency.value=.09;lg.gain.value=v*.32;lfo.connect(lg);lg.connect(g.gain);lfo.start();
+    o1.connect(fl);o2.connect(fl);fl.connect(g);g.connect(master);o1.start();o2.start();
+  }
+  function wind(){
+    const buf=audioCtx.createBuffer(1,audioCtx.sampleRate*2,audioCtx.sampleRate);
+    const d=buf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
+    const s=audioCtx.createBufferSource();s.buffer=buf;s.loop=true;
+    const fl=audioCtx.createBiquadFilter();fl.type='bandpass';fl.frequency.value=480;fl.Q.value=.22;
+    const g=audioCtx.createGain();g.gain.value=.013;
+    const lfo=audioCtx.createOscillator(),lg=audioCtx.createGain();
+    lfo.frequency.value=.035;lg.gain.value=.02;lfo.connect(lg);lg.connect(g.gain);lfo.start();
+    s.connect(fl);fl.connect(g);g.connect(master);s.start();
+  }
+  drone(38,.85);drone(55,.5);drone(82,.25);drone(110,.12);
+  choir(220,.09);choir(330,.065);choir(165,.08);
+  wind();
+}
+function toggleAudio(){
+  if(!audioCtx){buildAudio();audioPlaying=true;}
+  else if(audioPlaying){audioCtx.suspend();audioPlaying=false;}
+  else{audioCtx.resume();audioPlaying=true;}
+  document.querySelectorAll('.abar').forEach(b=>b.classList.toggle('paused',!audioPlaying));
+  document.getElementById('audio-label').textContent=audioPlaying?'♪ Música':'♪ Activar';
+}
+function playChord(freqs,vol=.09){
+  if(!audioCtx||!audioPlaying)return;
+  freqs.forEach((f,i)=>{
+    const o=audioCtx.createOscillator(),g=audioCtx.createGain();
+    o.type='triangle';o.frequency.value=f;
+    const t=audioCtx.currentTime+i*.14;
+    g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+.07);g.gain.exponentialRampToValueAtTime(.001,t+1.6);
+    o.connect(g);g.connect(audioCtx.destination);o.start(t);o.stop(t+1.6);
+  });
+}
+function playDetect(){
+  if(!audioCtx||!audioPlaying)return;
+  const o=audioCtx.createOscillator(),g=audioCtx.createGain();
+  o.type='sine';o.frequency.setValueAtTime(175,audioCtx.currentTime);o.frequency.exponentialRampToValueAtTime(350,audioCtx.currentTime+.5);
+  g.gain.setValueAtTime(0,audioCtx.currentTime);g.gain.linearRampToValueAtTime(.1,audioCtx.currentTime+.06);g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+1.2);
+  o.connect(g);g.connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+1.2);
+}
+
+/* ══════════════════════ CAMERA ══════════════════════ */
+const video=document.getElementById('video');
+const hudTop=document.getElementById('hud-top');
+const detectMsg=document.getElementById('detect-msg');
+const questionPanel=document.getElementById('question-panel');
+const detFlash=document.getElementById('det-flash');
+const faceRing=document.getElementById('face-ring');
+const statusDot=document.getElementById('status-dot');
+const statusTxt=document.getElementById('status-text');
+let cameraOn=false,wasPresent=false,presenceDebounce=null,detectionTimer=null;
+let faceDetector=null,prevFrame=null;
+
+async function startCamera(){
+  if(!audioCtx){buildAudio();audioPlaying=true;document.querySelectorAll('.abar').forEach(b=>b.classList.remove('paused'));document.getElementById('audio-label').textContent='♪ Música';}
+  try{
+    video.style.display='block';document.getElementById('no-cam-msg').style.display='none';
+    const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:{ideal:1280},height:{ideal:720}}});
+    video.srcObject=stream;
+    video.onloadedmetadata=()=>{
+      cameraOn=true;statusDot.classList.add('on');
+      statusTxt.textContent='Oráculo activo — escaneando...';
+      hudTop.textContent='Escaneando presencias...';
+      spawnDust();tryFaceDetector();
+      document.getElementById('start-btn').style.display='none';
+    };
+  }catch(e){
+    video.style.display='none';document.getElementById('no-cam-msg').style.display='flex';
+    statusTxt.textContent='El oráculo no puede ver';
+  }
+}
+async function tryFaceDetector(){
+  if(!('FaceDetector' in window)){motionFallback();return;}
+  try{faceDetector=new FaceDetector({fastMode:true,maxDetectedFaces:1});faceLoop();}
+  catch(e){motionFallback();}
+}
+function motionFallback(){
+  const mc=document.createElement('canvas');mc.width=80;mc.height=60;
+  const mX=mc.getContext('2d');
+  setInterval(()=>{
+    if(!cameraOn)return;
+    mX.drawImage(video,0,0,80,60);
+    const cur=mX.getImageData(0,0,80,60).data;
+    if(prevFrame){let d=0;for(let i=0;i<cur.length;i+=4)d+=Math.abs(cur[i]-prevFrame[i]);handleFaceState(d/(80*60)>4&&d/(80*60)<220);}
+    prevFrame=new Uint8ClampedArray(cur);
+  },400);
+}
+async function faceLoop(){
+  if(!cameraOn||!faceDetector){setTimeout(faceLoop,500);return;}
+  try{
+    const faces=await faceDetector.detect(video);
+    handleFaceState(faces.length>0);
+    if(faces.length>0){
+      const f=faces[0].boundingBox,vw=video.offsetWidth,vh=video.offsetHeight;
+      const sx=vw/(video.videoWidth||640),sy=vh/(video.videoHeight||480);
+      const mirX=vw-(f.x+f.width)*sx,fw=f.width*sx,fh=f.height*sy;
+      const cx2=mirX+fw/2,cy2=f.y*sy+fh/2,r=Math.max(fw,fh)*.62;
+      faceRing.style.cssText=`display:block;width:${r*2}px;height:${r*2}px;left:${cx2-r}px;top:${cy2-r}px`;
+    }else faceRing.style.display='none';
+  }catch(e){}
+  setTimeout(faceLoop,350);
+}
+function handleFaceState(p){
+  if(p===wasPresent)return;
+  clearTimeout(presenceDebounce);
+  presenceDebounce=setTimeout(()=>{wasPresent=p;p?onFaceDetected():onFaceLost();},600);
+}
+function onFaceDetected(){
+  hudTop.textContent='⟁ Presencia detectada';hudTop.style.color='#ff9933';
+  detFlash.classList.add('show');setTimeout(()=>detFlash.classList.remove('show'),600);
+  questionPanel.classList.remove('show');detectMsg.classList.add('show');
+  playDetect();
+  detectionTimer=setTimeout(()=>{
+    detectMsg.classList.remove('show');
+    setTimeout(()=>{questionPanel.classList.add('show');hudTop.textContent='El oráculo aguarda...';hudTop.style.color='#c8a96e';},400);
+  },2200);
+}
+function onFaceLost(){
+  clearTimeout(detectionTimer);
+  detectMsg.classList.remove('show');questionPanel.classList.remove('show');
+  faceRing.style.display='none';
+  hudTop.textContent='Escaneando presencias...';hudTop.style.color='#c8a96e';
+}
+
+/* ══════════════════════ CAREERS ══════════════════════ */
+const careers={
+  isc:{prophecy:'Arquitecto/a\ndel Sistema Digital',name:'Ingeniería en Sistemas Computacionales',quote:'«Como el Kwisatz Haderach que dobla el espacio-tiempo, tú doblarás la lógica en código. Los sistemas que construirás conectarán mundos, igual que la especería conecta el Imperio.»'},
+  iis:{prophecy:'Maestro/a\ndel Orden y el Flujo',name:'Ingeniería Industrial y de Sistemas',quote:'«Como los Mentats que procesan infinitud de variables para guiar imperios, tú optimizarás los engranajes de la industria. Cada proceso en tus manos se convierte en una danza perfecta.»'},
+  im:{prophecy:'Forjador/a\nde Máquinas Eternas',name:'Ingeniería Mecánica',quote:'«Como las tormentas de Arrakis que esculpen dunas con fuerza incontenible, tus manos darán forma a la materia misma. Las máquinas que diseñes sobrevivirán generaciones enteras.»'},
+};
+const careerKeys=Object.keys(careers);
+
+/* ══════════════════════ ORACLE RITUAL ══════════════════════ */
+const ritualPhrases=[
+  'Las arenas de Arrakis\nleen los patrones de tu destino...',
+  'El Oráculo Bene Gesserit\nconsulta las visiones del tiempo...',
+  'La especería sagrada\nrevela los caminos posibles...',
+  'Los Fremen han visto tu nombre\nescrito en las dunas eternas...',
+  'El Muad\'Dib reconoce\ntu potencial sin límites...',
+  'Las aguas de la vida\ndescifran la esencia de tu ser...',
+];
+
+let oracleRunning=false;
+
+function invokeOracle(){
+  if(oracleRunning)return;
+  oracleRunning=true;
+  questionPanel.classList.remove('show');detectMsg.classList.remove('show');
+
+  // Open eye animation
+  eyeTarget=1;ritualRunning=true;
+  const overlay=document.getElementById('ritual-overlay');
+  overlay.classList.add('show');
+
+  const phaseEl=document.getElementById('ritual-phase');
+  const txtEl=document.getElementById('ritual-text');
+  txtEl.textContent='';txtEl.style.opacity='1';
+
+  // Ritual rumble sound
+  if(audioCtx&&audioPlaying){
+    const o=audioCtx.createOscillator(),g=audioCtx.createGain(),fl=audioCtx.createBiquadFilter();
+    o.type='sawtooth';o.frequency.setValueAtTime(45,audioCtx.currentTime);
+    o.frequency.linearRampToValueAtTime(95,audioCtx.currentTime+2.5);
+    fl.type='lowpass';fl.frequency.value=180;fl.Q.value=2.5;
+    g.gain.setValueAtTime(0,audioCtx.currentTime);g.gain.linearRampToValueAtTime(.07,audioCtx.currentTime+.4);
+    g.gain.setValueAtTime(.07,audioCtx.currentTime+2);g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+5);
+    o.connect(fl);fl.connect(g);g.connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+5);
+  }
+
+  // Sequence of ritual phases
+  const phrase=ritualPhrases[Math.floor(Math.random()*ritualPhrases.length)];
+  const sequence=[
+    {t:0,    phase:'Abriendo el ojo del oráculo...', text:''},
+    {t:1000, phase:'Las visiones toman forma...', text:phrase},
+    {t:2400, phase:'Leyendo los patrones eternos...', text:''},
+    {t:3200, phase:'El destino cristaliza en la arena...', text:'«Quien controla la especería,\ncontrola el universo.\nTú controlarás mucho más.»'},
+    {t:4400, phase:'La profecía emerge del tiempo...', text:''},
+    {t:5200, phase:'✦ Un camino es elegido ✦', text:''},
+  ];
+
+  sequence.forEach(({t,phase,text})=>{
+    setTimeout(()=>{
+      phaseEl.style.opacity='0';
+      setTimeout(()=>{phaseEl.textContent=phase;phaseEl.style.opacity='1';},200);
+      if(text!==undefined){
+        txtEl.style.opacity='0';
+        setTimeout(()=>{txtEl.textContent=text;txtEl.style.transition='opacity .7s';txtEl.style.opacity=text?'1':'0';},250);
+      }
+    },t);
+  });
+
+  // Eye begins closing at the end
+  setTimeout(()=>{ eyeTarget=0; },5400);
+
+  // Pick random and reveal
+  const chosen=careerKeys[Math.floor(Math.random()*careerKeys.length)];
+  playChord([220,277,330,440,554],.07);
+
+  setTimeout(()=>{
+    ritualRunning=false;
+    overlay.classList.remove('show');
+    setTimeout(()=>showResult(chosen),400);
+  },6000);
+}
+
+function showResult(key){
+  const c=careers[key];
+  document.getElementById('res-prophecy').innerText=c.prophecy;
+  document.getElementById('res-career').textContent=c.name;
+  document.getElementById('res-quote').textContent=c.quote;
+  document.getElementById('result-overlay').classList.add('show');
+  hudTop.textContent='✦ La profecía ha sido revelada ✦';hudTop.style.color='#ff9933';
+  setTimeout(()=>playChord([330,415,494,659],.1),200);
+}
+
+function closeResult(){
+  document.getElementById('result-overlay').classList.remove('show');
+  oracleRunning=false;
+  hudTop.textContent='Escaneando presencias...';hudTop.style.color='#c8a96e';
+  wasPresent=false;
+}
+
+/* ══════════════════════ DUST ══════════════════════ */
+function spawnDust(){
+  const c=document.getElementById('dust');c.innerHTML='';
+  for(let i=0;i<22;i++){
+    const d=document.createElement('div');d.className='dust-p';
+    const sz=1+Math.random()*2;
+    d.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}%;bottom:${Math.random()*65}%;animation-duration:${2+Math.random()*3}s;animation-delay:${Math.random()*3}s;`;
+    c.appendChild(d);
+  }
+}
+</script>
+</body>
+</html>
