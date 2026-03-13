@@ -17,42 +17,20 @@ html,body{width:100%;height:100%;background:var(--dark);font-family:'Crimson Pro
 /* ── FULLSCREEN LAYOUT ── */
 #app{position:fixed;inset:0;z-index:1;display:flex;flex-direction:column}
 
-/* HEADER — two rows on mobile, single row on wider screens */
-.header{
-  position:relative;z-index:2;flex-shrink:0;
-  display:flex;flex-direction:column;gap:6px;
-  padding:10px 14px 8px;
-  background:linear-gradient(180deg,rgba(5,2,0,.97) 60%,rgba(5,2,0,.8),transparent);
-}
-/* Row 1: logo + title */
-.header-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
-.header-left{display:flex;flex-direction:column;gap:2px;min-width:0}
-.tec-badge{display:inline-flex;align-items:center;gap:6px}
-.tec-badge span{font-family:'Cinzel',serif;font-size:9px;color:var(--sand);letter-spacing:.16em;text-transform:uppercase}
-.main-title{font-family:'Cinzel',serif;font-size:clamp(16px,5vw,22px);font-weight:900;color:var(--sand2);letter-spacing:.06em;line-height:1;text-shadow:0 0 20px rgba(200,169,110,.4);white-space:nowrap}
-.main-title em{color:var(--spice2);font-style:normal;font-size:.65em;font-weight:400;letter-spacing:.12em;margin-left:5px}
-/* Row 1 right: status dot */
-#status-row{display:flex;align-items:center;gap:5px;font-family:'Cinzel',serif;font-size:9px;letter-spacing:.1em;color:rgba(200,169,110,.5);text-transform:uppercase;white-space:nowrap;flex-shrink:0}
-#status-dot{width:6px;height:6px;border-radius:50%;background:rgba(200,169,110,.2);flex-shrink:0}
+/* HEADER BAR */
+.header{position:relative;z-index:2;display:flex;align-items:center;justify-content:space-between;padding:8px 12px 7px;background:linear-gradient(180deg,rgba(5,2,0,.95),rgba(5,2,0,.8),transparent);flex-shrink:0}
+.header-left{display:flex;flex-direction:column;gap:1px}
+.tec-badge{display:inline-flex;align-items:center;gap:7px}
+.tec-badge span{font-family:'Cinzel',serif;font-size:9px;color:var(--sand);letter-spacing:.18em;text-transform:uppercase}
+.main-title{font-family:'Cinzel',serif;font-size:clamp(14px,4vw,20px);font-weight:900;color:var(--sand2);letter-spacing:.06em;line-height:1;text-shadow:0 0 20px rgba(200,169,110,.4)}
+.main-title em{color:var(--spice2);font-style:normal;font-size:.7em;font-weight:400;letter-spacing:.13em;margin-left:6px}
+.header-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+#status-row{display:flex;align-items:center;gap:5px;font-family:'Cinzel',serif;font-size:8px;letter-spacing:.1em;color:rgba(200,169,110,.45);text-transform:uppercase}
+#status-dot{width:5px;height:5px;border-radius:50%;background:rgba(200,169,110,.2);flex-shrink:0}
 #status-dot.on{background:var(--spice2);box-shadow:0 0 5px var(--spice);animation:dotP 2s ease-in-out infinite}
 @keyframes dotP{0%,100%{opacity:1}50%{opacity:.3}}
-
-/* Row 2: vision button — full width, prominent */
-.header-btns{display:flex;align-items:center;justify-content:center}
-#vision-btn{
-  flex:1;
-  background:rgba(20,10,0,.92);border:1px solid rgba(200,169,110,.5);border-radius:4px;
-  padding:12px 20px;
-  font-family:'Cinzel',serif;font-size:clamp(13px,4vw,16px);font-weight:700;letter-spacing:.15em;
-  color:var(--sand2);text-transform:uppercase;cursor:pointer;transition:all .25s;
-  position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;gap:8px;
-}
-#vision-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,153,51,.1),transparent);opacity:0;transition:opacity .3s}
-#vision-btn:hover{border-color:var(--spice2);box-shadow:0 0 18px rgba(255,107,0,.35);color:#fff}
-#vision-btn:hover::before{opacity:1}
-#vision-btn:active{transform:scale(.98)}
-.eye-icon{font-size:16px;display:inline-block;animation:eyeBlink 5s ease-in-out infinite}
-@keyframes eyeBlink{0%,88%,100%{opacity:1;transform:scaleY(1)}93%{opacity:.05;transform:scaleY(.1)}}
+#start-btn{background:rgba(26,15,0,.9);border:1px solid rgba(200,169,110,.45);border-radius:3px;padding:7px 14px;font-family:'Cinzel',serif;font-size:10px;font-weight:700;letter-spacing:.14em;color:var(--sand);text-transform:uppercase;cursor:pointer;transition:all .25s;white-space:nowrap}
+#start-btn:hover{border-color:var(--spice2);color:var(--sand2)}
 
 /* CAMERA */
 #cam-wrap{flex:1;position:relative;width:100%;overflow:hidden;background:#0a0500;border-top:1px solid rgba(200,169,110,.2);border-bottom:1px solid rgba(200,169,110,.2);box-shadow:inset 0 0 60px rgba(0,0,0,.5)}
@@ -117,28 +95,26 @@ html,body{width:100%;height:100%;background:var(--dark);font-family:'Crimson Pro
 
 #no-cam-msg{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:2rem;text-align:center;font-family:'Cinzel',serif;font-size:12px;letter-spacing:.1em;color:rgba(200,169,110,.4)}
 
-/* BOTTOM BAR — Despertar + salir */
+/* vision-btn now lives in header — compact size */
 #bottom-bar{
   position:relative;z-index:2;flex-shrink:0;
-  display:flex;align-items:center;justify-content:space-between;gap:8px;
-  padding:8px 14px 14px;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:8px 14px 12px;
   background:linear-gradient(180deg,transparent,rgba(5,2,0,.88),rgba(5,2,0,.97));
 }
-#start-btn{
-  flex:1;
-  background:rgba(26,15,0,.9);border:1px solid rgba(200,169,110,.4);border-radius:4px;
-  padding:11px 16px;font-family:'Cinzel',serif;font-size:clamp(12px,3.5vw,14px);
-  font-weight:700;letter-spacing:.14em;color:var(--sand);text-transform:uppercase;
-  cursor:pointer;transition:all .25s;white-space:nowrap;
-}
-#start-btn:hover{border-color:var(--spice2);color:var(--sand2);box-shadow:0 0 12px rgba(255,107,0,.2)}
-#start-btn:active{transform:scale(.98)}
+#vision-btn{background:rgba(20,10,0,.92);border:1px solid rgba(200,169,110,.5);border-radius:3px;padding:6px 12px;font-family:'Cinzel',serif;font-size:clamp(9px,2.5vw,11px);font-weight:700;letter-spacing:.12em;color:var(--sand2);text-transform:uppercase;cursor:pointer;transition:all .25s;position:relative;overflow:hidden;display:flex;align-items:center;gap:5px;white-space:nowrap}
+#vision-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,153,51,.08),transparent);opacity:0;transition:opacity .3s}
+#vision-btn:hover{border-color:var(--spice2);box-shadow:0 0 14px rgba(255,107,0,.3);color:#fff}
+#vision-btn:hover::before{opacity:1}
+#vision-btn:active{transform:scale(.97)}
+.eye-icon{font-size:12px;display:inline-block;animation:eyeBlink 5s ease-in-out infinite}
+@keyframes eyeBlink{0%,88%,100%{opacity:1;transform:scaleY(1)}93%{opacity:.05;transform:scaleY(.1)}}
 
-/* fs-exit-btn — secondary, compact */
+/* fs-exit-btn in bottom bar */
 #fs-exit-btn{
-  background:rgba(5,2,0,.6);border:1px solid rgba(200,169,110,.22);border-radius:4px;
-  padding:11px 14px;font-family:'Cinzel',serif;font-size:clamp(11px,3vw,13px);letter-spacing:.1em;
-  color:rgba(200,169,110,.45);cursor:pointer;transition:all .2s;white-space:nowrap;flex-shrink:0;
+  background:rgba(5,2,0,.6);border:1px solid rgba(200,169,110,.22);border-radius:3px;
+  padding:5px 10px;font-family:'Cinzel',serif;font-size:8px;letter-spacing:.1em;
+  color:rgba(200,169,110,.4);cursor:pointer;transition:all .2s;white-space:nowrap;
 }
 #fs-exit-btn:hover{color:var(--sand);border-color:rgba(200,169,110,.5)}
 
@@ -171,11 +147,15 @@ html,body{width:100%;height:100%;background:var(--dark);font-family:'Crimson Pro
 #result-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--sand),var(--spice2),var(--sand),transparent)}
 #result-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--sand),var(--spice2),var(--sand),transparent)}
 
-/* Photo area — fixed 4:3, matches capture crop */
+/* Photo area — top of card, no forced aspect-ratio; canvas fills it */
 #photo-frame{
-  position:relative;width:100%;aspect-ratio:4/3;overflow:hidden;background:#0a0500;line-height:0;
+  position:relative;
+  width:100%;
+  overflow:hidden;
+  background:#0a0500;
+  line-height:0; /* remove inline gap */
 }
-#photo-canvas{width:100%;height:100%;display:block;object-fit:cover}
+#photo-canvas{width:100%;height:auto;display:block;max-height:55vw}
 
 /* Ornate frame overlay on photo */
 #photo-frame::before{
@@ -218,20 +198,18 @@ html,body{width:100%;height:100%;background:var(--dark);font-family:'Crimson Pro
 <canvas id="bg-canvas"></canvas>
 
 <div id="app">
-  <!-- HEADER: row1=logo+title+status, row2=vision button -->
+  <!-- TOP BAR: logo | title | consultar visión -->
   <div class="header">
-    <div class="header-top">
-      <div class="header-left">
-        <div class="tec-badge">
-          <svg width="16" height="16" viewBox="0 0 28 28"><rect width="28" height="28" rx="2" fill="#1a0f00"/><text x="14" y="20" font-family="Arial" font-weight="900" font-size="12" fill="#c8a96e" text-anchor="middle">TEC</text></svg>
-          <span>Tecnológico de Monterrey</span>
-        </div>
-        <div class="main-title">Oráculo de Arrakis<em>— Tu destino</em></div>
+    <div class="header-left">
+      <div class="tec-badge">
+        <svg width="16" height="16" viewBox="0 0 28 28"><rect width="28" height="28" rx="2" fill="#1a0f00"/><text x="14" y="20" font-family="Arial" font-weight="900" font-size="12" fill="#c8a96e" text-anchor="middle">TEC</text></svg>
+        <span>Tecnológico de Monterrey</span>
       </div>
-      <div id="status-row"><div id="status-dot"></div><span id="status-text">Inactivo</span></div>
+      <div class="main-title">Oráculo de Arrakis<em>— Tu destino</em></div>
     </div>
-    <div class="header-btns">
-      <button id="vision-btn" onclick="invokeOracle()"><span class="eye-icon">👁</span> Consultar mi visión</button>
+    <div class="header-right">
+      <div id="status-row"><div id="status-dot"></div><span id="status-text">Inactivo</span></div>
+      <button id="vision-btn" onclick="invokeOracle()"><span class="eye-icon">👁</span> Consultar visión</button>
     </div>
   </div>
 
@@ -555,37 +533,40 @@ function onFaceLost(){
 let capturedPhotoDataURL = null;
 
 function captureAndStylePhoto(){
-  const snap = document.getElementById('snap-canvas');
-  const sCtx = snap.getContext('2d');
+  const snap=document.getElementById('snap-canvas');
+  const sCtx=snap.getContext('2d');
+
+  // --- Compute what the user actually SEES on screen ---
+  // The video element is CSS: width=100%, height=100%, object-fit=cover, scale(zoom)
+  // We need to crop the video source to match the visible region.
+  const camWrap = document.getElementById('cam-wrap');
+  const dispW = camWrap.offsetWidth;   // display width in px
+  const dispH = camWrap.offsetHeight;  // display height in px
+
+  const zoomVal = parseFloat(document.getElementById('zoom-range').value) / 100; // e.g. 0.72
   const vw = video.videoWidth  || 640;
   const vh = video.videoHeight || 480;
 
-  // Target: 4:3 crop centered on the video source, at 2× resolution
-  // This matches the result card photo area and avoids any stretch/distortion.
-  const TARGET_RATIO = 4 / 3;
-  const outW = 800; // fixed output width (2× of ~400px card)
-  const outH = Math.round(outW / TARGET_RATIO); // = 600
+  // With object-fit:cover at zoom level, the effective video region shown:
+  // scale(zoom) shrinks the video element visually → more of the video is visible
+  // effective render size of video el before CSS crop: dispW/zoom × dispH/zoom
+  const effW = dispW / zoomVal;
+  const effH = dispH / zoomVal;
 
+  // Scale factor from video pixels → effective render px
+  const scaleToFit = Math.max(effW / vw, effH / vh); // object-fit:cover uses max
+  // Visible source rectangle (centered)
+  const srcW = Math.min(vw, effW / scaleToFit);
+  const srcH = Math.min(vh, effH / scaleToFit);
+  const srcX = (vw - srcW) / 2;
+  const srcY = (vh - srcH) / 2;
+
+  // Output canvas matches display aspect ratio
+  const outW = dispW * 2;  // 2x retina
+  const outH = dispH * 2;
   snap.width = outW; snap.height = outH;
 
-  // Compute the source crop rectangle (center-crop video to 4:3)
-  let srcW, srcH, srcX, srcY;
-  const videoRatio = vw / vh;
-  if(videoRatio > TARGET_RATIO){
-    // Video is wider than 4:3 → crop sides
-    srcH = vh;
-    srcW = Math.round(vh * TARGET_RATIO);
-    srcX = Math.round((vw - srcW) / 2);
-    srcY = 0;
-  } else {
-    // Video is taller than 4:3 → crop top/bottom
-    srcW = vw;
-    srcH = Math.round(vw / TARGET_RATIO);
-    srcX = 0;
-    srcY = Math.round((vh - srcH) / 2);
-  }
-
-  // Draw mirrored + center-cropped to exact 4:3
+  // Draw mirrored + cropped
   sCtx.save();
   sCtx.translate(outW, 0); sCtx.scale(-1, 1);
   sCtx.drawImage(video, srcX, srcY, srcW, srcH, 0, 0, outW, outH);
@@ -640,20 +621,21 @@ function captureAndStylePhoto(){
 
 function renderPhotoToCard(prophecyText, careerName){
   if(!capturedPhotoDataURL) return;
-  const pc    = document.getElementById('photo-canvas');
-  const frame = document.getElementById('photo-frame');
-  const W = frame.offsetWidth || 360;
-  const H = Math.round(W * 3 / 4); // always 4:3, matches capture
+  const pc=document.getElementById('photo-canvas');
+  const frame=document.getElementById('photo-frame');
+  const frameW = frame.offsetWidth || 360;
 
-  pc.width  = W * 2; pc.height = H * 2; // 2× retina
-  pc.style.width  = W + 'px';
-  pc.style.height = H + 'px';
-
-  const img = new Image();
-  img.onload = () => {
+  const img=new Image();
+  img.onload=()=>{
+    // Preserve captured proportions
+    const ratio = img.naturalHeight / img.naturalWidth;
+    const W = frameW;
+    const H = Math.round(W * ratio);
+    pc.width  = W * 2; pc.height = H * 2; // 2x retina
+    pc.style.width = W+'px'; pc.style.height = H+'px';
     const ctx = pc.getContext('2d');
-    ctx.scale(2, 2);
-    // drawImage fills the exact 4:3 canvas — no stretch because source is also 4:3
+    ctx.scale(2,2);
+    // Draw photo only — no text overlay
     ctx.drawImage(img, 0, 0, W, H);
   };
   img.src = capturedPhotoDataURL;
