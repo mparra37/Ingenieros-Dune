@@ -37,26 +37,15 @@ html,body{width:100%;height:100%;background:var(--dark);font-family:'Crimson Pro
 /* scaleX(-1) mirrors, scale(var(--zoom)) zooms out — value set by JS slider */
 #video{width:100%;height:100%;object-fit:cover;display:block;transform:scaleX(-1) scale(var(--video-zoom,0.72));transform-origin:center center;filter:sepia(.15) saturate(.88) contrast(1.08)}
 
-/* ── ZOOM CONTROL (hidden — uncomment display to re-enable) ──
+/* Zoom control — small pill in bottom-left of cam */
 #zoom-ctrl{position:absolute;bottom:10px;left:10px;z-index:10;display:flex;align-items:center;gap:6px;background:rgba(5,2,0,.7);border:1px solid rgba(200,169,110,.25);border-radius:20px;padding:4px 10px;pointer-events:auto}
 #zoom-ctrl label{font-family:'Cinzel',serif;font-size:8px;letter-spacing:.12em;color:rgba(200,169,110,.5);text-transform:uppercase;white-space:nowrap}
 #zoom-range{-webkit-appearance:none;appearance:none;width:70px;height:3px;background:rgba(200,169,110,.2);border-radius:2px;outline:none;cursor:pointer}
 #zoom-range::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;border-radius:50%;background:var(--spice2);cursor:pointer;box-shadow:0 0 5px rgba(255,107,0,.4)}
-── END ZOOM CONTROL ── */
-#zoom-ctrl{display:none} /* zoom hidden — remove this line to show slider */
 
-/* Fullscreen exit button — always visible, small, top-right of header */
-#fs-exit-btn{
-  background:rgba(5,2,0,.75);
-  border:1px solid rgba(200,169,110,.28);
-  border-radius:3px;
-  padding:5px 9px;
-  font-family:'Cinzel',serif;font-size:8px;letter-spacing:.1em;
-  color:rgba(200,169,110,.55);
-  cursor:pointer;transition:all .2s;
-  white-space:nowrap;flex-shrink:0;
-}
-#fs-exit-btn:hover{color:var(--sand);border-color:rgba(200,169,110,.6);background:rgba(20,10,0,.9)}
+/* Fullscreen exit button — tiny, top-left corner */
+#fs-exit-btn{position:fixed;top:8px;left:8px;z-index:999;background:rgba(5,2,0,.7);border:1px solid rgba(200,169,110,.3);border-radius:3px;padding:4px 8px;font-family:'Cinzel',serif;font-size:8px;letter-spacing:.1em;color:rgba(200,169,110,.5);cursor:pointer;transition:all .2s;display:none}
+#fs-exit-btn:hover{color:var(--sand);border-color:rgba(200,169,110,.6)}
 #hud{position:absolute;inset:0;pointer-events:none}
 
 /* Corner brackets */
@@ -80,14 +69,14 @@ html,body{width:100%;height:100%;background:var(--dark);font-family:'Crimson Pro
 #cam-flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;transition:opacity .08s}
 #cam-flash.pop{opacity:.9}
 
-/* Detect + question overlays — TOP of camera */
-#detect-msg{position:absolute;top:0;left:0;right:0;padding:14px 18px 16px;background:linear-gradient(180deg,rgba(10,5,0,.97) 50%,transparent);display:flex;flex-direction:column;align-items:center;gap:6px;opacity:0;transform:translateY(-10px);transition:opacity .6s,transform .6s;pointer-events:none}
+/* Detect message */
+#detect-msg{position:absolute;bottom:0;left:0;right:0;padding:16px 18px 14px;background:linear-gradient(0deg,rgba(10,5,0,.97) 50%,transparent);display:flex;flex-direction:column;align-items:center;gap:6px;opacity:0;transform:translateY(10px);transition:opacity .6s,transform .6s;pointer-events:none}
 #detect-msg.show{opacity:1;transform:translateY(0)}
 .detect-label{font-family:'Cinzel',serif;font-size:9px;letter-spacing:.22em;color:var(--spice);text-transform:uppercase}
 .detect-text{font-family:'Cinzel',serif;font-size:clamp(15px,4.5vw,22px);font-weight:600;color:var(--sand2);text-align:center;line-height:1.3;text-shadow:0 0 16px rgba(200,169,110,.5)}
 
-/* Question panel — TOP of camera */
-#question-panel{position:absolute;top:0;left:0;right:0;padding:12px 20px 14px;background:linear-gradient(180deg,rgba(10,5,0,.98) 55%,transparent);display:flex;flex-direction:column;align-items:center;gap:8px;opacity:0;transform:translateY(-10px);transition:opacity .5s,transform .5s;pointer-events:none}
+/* Question panel */
+#question-panel{position:absolute;bottom:0;left:0;right:0;padding:14px 20px 16px;background:linear-gradient(0deg,rgba(10,5,0,.98) 55%,transparent);display:flex;flex-direction:column;align-items:center;gap:10px;opacity:0;transform:translateY(10px);transition:opacity .5s,transform .5s;pointer-events:none}
 #question-panel.show{opacity:1;transform:translateY(0)}
 .question-text{font-family:'Crimson Pro',serif;font-size:clamp(13px,3.8vw,17px);font-style:italic;color:var(--sand);text-align:center;line-height:1.55}
 .q-pulse{width:8px;height:8px;border-radius:50%;background:var(--spice2);animation:qPulse 1.2s ease-in-out infinite}
@@ -95,28 +84,15 @@ html,body{width:100%;height:100%;background:var(--dark);font-family:'Crimson Pro
 
 #no-cam-msg{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:2rem;text-align:center;font-family:'Cinzel',serif;font-size:12px;letter-spacing:.1em;color:rgba(200,169,110,.4)}
 
-/* vision-btn now lives in header — compact size */
-#bottom-bar{
-  position:relative;z-index:2;flex-shrink:0;
-  display:flex;align-items:center;justify-content:space-between;
-  padding:8px 14px 12px;
-  background:linear-gradient(180deg,transparent,rgba(5,2,0,.88),rgba(5,2,0,.97));
-}
-#vision-btn{background:rgba(20,10,0,.92);border:1px solid rgba(200,169,110,.5);border-radius:3px;padding:6px 12px;font-family:'Cinzel',serif;font-size:clamp(9px,2.5vw,11px);font-weight:700;letter-spacing:.12em;color:var(--sand2);text-transform:uppercase;cursor:pointer;transition:all .25s;position:relative;overflow:hidden;display:flex;align-items:center;gap:5px;white-space:nowrap}
+/* BOTTOM BAR */
+#bottom-bar{position:relative;z-index:2;display:flex;align-items:center;justify-content:center;padding:10px 12px 14px;background:linear-gradient(180deg,transparent,rgba(5,2,0,.88),rgba(5,2,0,.96));flex-shrink:0}
+#vision-btn{background:rgba(20,10,0,.92);border:1px solid rgba(200,169,110,.5);border-radius:3px;padding:11px 28px;font-family:'Cinzel',serif;font-size:clamp(11px,3.5vw,13px);font-weight:700;letter-spacing:.18em;color:var(--sand2);text-transform:uppercase;cursor:pointer;transition:all .25s;position:relative;overflow:hidden;display:flex;align-items:center;gap:9px;white-space:nowrap}
 #vision-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,153,51,.08),transparent);opacity:0;transition:opacity .3s}
-#vision-btn:hover{border-color:var(--spice2);box-shadow:0 0 14px rgba(255,107,0,.3);color:#fff}
+#vision-btn:hover{border-color:var(--spice2);box-shadow:0 0 20px rgba(255,107,0,.3);color:#fff}
 #vision-btn:hover::before{opacity:1}
 #vision-btn:active{transform:scale(.97)}
-.eye-icon{font-size:12px;display:inline-block;animation:eyeBlink 5s ease-in-out infinite}
+.eye-icon{font-size:15px;display:inline-block;animation:eyeBlink 5s ease-in-out infinite}
 @keyframes eyeBlink{0%,88%,100%{opacity:1;transform:scaleY(1)}93%{opacity:.05;transform:scaleY(.1)}}
-
-/* fs-exit-btn in bottom bar */
-#fs-exit-btn{
-  background:rgba(5,2,0,.6);border:1px solid rgba(200,169,110,.22);border-radius:3px;
-  padding:5px 10px;font-family:'Cinzel',serif;font-size:8px;letter-spacing:.1em;
-  color:rgba(200,169,110,.4);cursor:pointer;transition:all .2s;white-space:nowrap;
-}
-#fs-exit-btn:hover{color:var(--sand);border-color:rgba(200,169,110,.5)}
 
 /* ══ RITUAL OVERLAY ══ */
 #ritual-overlay{position:fixed;inset:0;z-index:200;background:rgba(5,2,0,0);display:flex;align-items:center;justify-content:center;pointer-events:none;transition:background .7s}
@@ -181,9 +157,7 @@ html,body{width:100%;height:100%;background:var(--dark);font-family:'Crimson Pro
 .po-title{font-family:'Cinzel',serif;font-size:clamp(16px,5vw,24px);font-weight:900;color:var(--sand2);line-height:1.1;text-shadow:0 0 20px rgba(200,169,110,.6);white-space:pre-line}
 
 /* Card text section */
-.card-body{padding:12px 18px 0;text-align:center}
-.res-eyebrow{font-family:'Cinzel',serif;font-size:8px;letter-spacing:.25em;color:var(--spice);text-transform:uppercase;margin-bottom:6px}
-.res-prophecy{font-family:'Cinzel',serif;font-size:clamp(18px,5vw,26px);font-weight:900;color:var(--sand2);line-height:1.15;text-shadow:0 0 20px rgba(200,169,110,.45);margin-bottom:6px;white-space:pre-line}
+.card-body{padding:14px 18px 0}
 .res-career{font-family:'Cinzel',serif;font-size:clamp(11px,3vw,14px);font-weight:600;color:var(--spice2);letter-spacing:.05em;margin-bottom:10px;line-height:1.35;text-shadow:0 0 16px rgba(255,107,0,.4)}
 .res-divider{width:60px;height:1px;background:linear-gradient(90deg,transparent,var(--sand),transparent);margin:0 auto 10px}
 .res-quote{font-family:'Crimson Pro',serif;font-size:clamp(12px,3.2vw,14px);font-style:italic;font-weight:300;color:rgba(232,213,176,.78);line-height:1.62;margin-bottom:12px}
@@ -197,8 +171,10 @@ html,body{width:100%;height:100%;background:var(--dark);font-family:'Crimson Pro
 
 <canvas id="bg-canvas"></canvas>
 
+<button id="fs-exit-btn" onclick="exitFS()" title="Salir pantalla completa">⛶ salir</button>
+
 <div id="app">
-  <!-- TOP BAR: logo | title | consultar visión -->
+  <!-- HEADER -->
   <div class="header">
     <div class="header-left">
       <div class="tec-badge">
@@ -209,11 +185,11 @@ html,body{width:100%;height:100%;background:var(--dark);font-family:'Crimson Pro
     </div>
     <div class="header-right">
       <div id="status-row"><div id="status-dot"></div><span id="status-text">Inactivo</span></div>
-      <button id="vision-btn" onclick="invokeOracle()"><span class="eye-icon">👁</span> Consultar visión</button>
+      <button id="start-btn" onclick="startCamera()">⟁ Despertar</button>
     </div>
   </div>
 
-  <!-- CAMERA fills remaining space -->
+  <!-- CAMERA -->
   <div id="cam-wrap">
     <video id="video" autoplay playsinline muted></video>
     <div id="hud">
@@ -246,14 +222,16 @@ html,body{width:100%;height:100%;background:var(--dark);font-family:'Crimson Pro
       <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#c8a96e" stroke-width="1"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
       <div>El oráculo requiere tu presencia.<br>Permite acceso a la cámara.</div>
     </div>
-  </div><!-- end cam-wrap -->
-
-  <!-- BOTTOM BAR: secondary controls -->
-  <div id="bottom-bar">
-    <button id="start-btn" onclick="startCamera()">⟁ Despertar oráculo</button>
-    <button id="fs-exit-btn" onclick="toggleFS()" title="Salir pantalla completa">⛶ salir</button>
   </div>
-</div><!-- end app -->
+
+  <!-- BOTTOM BAR -->
+  <div id="bottom-bar">
+    <button id="vision-btn" onclick="invokeOracle()">
+      <span class="eye-icon">👁</span>
+      Consultar mi visión
+    </button>
+  </div>
+</div>
 
 <!-- RITUAL OVERLAY -->
 <div id="ritual-overlay">
@@ -276,11 +254,9 @@ html,body{width:100%;height:100%;background:var(--dark);font-family:'Crimson Pro
         <div class="po-title" id="res-prophecy"></div>
       </div>
     </div>
-    <!-- Text body — prophecy title + career + quote all below photo -->
+    <!-- Text body -->
     <div class="card-body">
-      <div style="height:10px"></div>
-      <div class="res-eyebrow">▸ profecía revelada ◂</div>
-      <div class="res-prophecy" id="res-prophecy"></div>
+      <div style="height:12px"></div>
       <div class="res-career" id="res-career"></div>
       <div class="res-divider"></div>
       <div class="res-quote" id="res-quote"></div>
@@ -295,30 +271,23 @@ html,body{width:100%;height:100%;background:var(--dark);font-family:'Crimson Pro
 
 <script>
 /* ═══════════════════════════════════════
-   FULLSCREEN TOGGLE — always available
+   FULLSCREEN EXIT
 ═══════════════════════════════════════ */
 const fsBtn = document.getElementById('fs-exit-btn');
-
-function toggleFS(){
-  const doc = window.document;
-  const docEl = doc.documentElement;
-  const requestFS = docEl.requestFullscreen || docEl.mozRequestFullScreen || docEl.webkitRequestFullScreen || docEl.msRequestFullscreen;
-  const cancelFS  = doc.exitFullscreen    || doc.mozCancelFullScreen    || doc.webkitExitFullscreen    || doc.msExitFullscreen;
-  if(!doc.fullscreenElement && !doc.mozFullScreenElement && !doc.webkitFullscreenElement && !doc.msFullscreenElement){
-    requestFS.call(docEl);
-  } else {
-    cancelFS.call(doc);
-  }
+function exitFS(){
+  if(document.exitFullscreen) document.exitFullscreen();
+  else if(document.webkitExitFullscreen) document.webkitExitFullscreen();
+  else if(document.mozCancelFullScreen) document.mozCancelFullScreen();
 }
-
 function updateFsBtn(){
   const inFS = !!(document.fullscreenElement||document.webkitFullscreenElement||document.mozFullScreenElement);
-  fsBtn.textContent = inFS ? '⛶ salir' : '⛶ pantalla';
+  fsBtn.style.display = inFS ? 'block' : 'none';
 }
 document.addEventListener('fullscreenchange', updateFsBtn);
 document.addEventListener('webkitfullscreenchange', updateFsBtn);
 document.addEventListener('mozfullscreenchange', updateFsBtn);
-updateFsBtn(); // set initial label
+// Show on load in case browser opened in fullscreen kiosk mode
+updateFsBtn();
 
 /* ═══════════════════════════════════════
    ZOOM SLIDER — init CSS var
@@ -435,37 +404,19 @@ let cameraOn=false,wasPresent=false,presenceDebounce=null,detectionTimer=null;
 let faceDetector=null,prevFrame=null;
 
 async function startCamera(){
-  // Toggle: if camera is on, stop it; if off, start it
-  if(cameraOn){
-    const stream = video.srcObject;
-    if(stream) stream.getTracks().forEach(t=>t.stop());
-    video.srcObject = null;
-    cameraOn = false;
-    wasPresent = false;
-    clearTimeout(detectionTimer);
-    detectMsg.classList.remove('show');
-    questionPanel.classList.remove('show');
-    faceRing.style.display='none';
-    statusDot.classList.remove('on');
-    statusTxt.textContent='Inactivo';
-    hudTop.textContent='Aguardando al elegido...';
-    hudTop.style.color='#c8a96e';
-    document.getElementById('start-btn').textContent='⟁ Despertar oráculo';
-    return;
-  }
   try{
-    video.style.display='block'; document.getElementById('no-cam-msg').style.display='none';
+    video.style.display='block';document.getElementById('no-cam-msg').style.display='none';
     const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:{ideal:1280},height:{ideal:720}}});
     video.srcObject=stream;
     video.onloadedmetadata=()=>{
-      cameraOn=true; statusDot.classList.add('on');
+      cameraOn=true;statusDot.classList.add('on');
       statusTxt.textContent='Activo';
       hudTop.textContent='Escaneando presencias...';
-      spawnDust(); tryFaceDetector();
-      document.getElementById('start-btn').textContent='◼ Apagar oráculo';
+      spawnDust();tryFaceDetector();
+      document.getElementById('start-btn').style.display='none';
     };
   }catch(e){
-    video.style.display='none'; document.getElementById('no-cam-msg').style.display='flex';
+    video.style.display='none';document.getElementById('no-cam-msg').style.display='flex';
     statusTxt.textContent='Sin acceso';
   }
 }
@@ -627,16 +578,56 @@ function renderPhotoToCard(prophecyText, careerName){
 
   const img=new Image();
   img.onload=()=>{
-    // Preserve captured proportions
+    // Keep the original captured proportions — no forced 4:3
     const ratio = img.naturalHeight / img.naturalWidth;
     const W = frameW;
     const H = Math.round(W * ratio);
-    pc.width  = W * 2; pc.height = H * 2; // 2x retina
-    pc.style.width = W+'px'; pc.style.height = H+'px';
+
+    pc.width  = W * 2;  // 2x retina
+    pc.height = H * 2;
+    pc.style.width  = W + 'px';
+    pc.style.height = H + 'px';
+
     const ctx = pc.getContext('2d');
-    ctx.scale(2,2);
-    // Draw photo only — no text overlay
+    ctx.scale(2, 2);
+
+    // Draw the styled photo
     ctx.drawImage(img, 0, 0, W, H);
+
+    // Bottom gradient for text legibility
+    const grad = ctx.createLinearGradient(0, H*.4, 0, H);
+    grad.addColorStop(0,'rgba(5,2,0,0)');
+    grad.addColorStop(.5,'rgba(5,2,0,.72)');
+    grad.addColorStop(1,'rgba(5,2,0,.94)');
+    ctx.fillStyle = grad; ctx.fillRect(0, 0, W, H);
+
+    // Eyebrow label
+    ctx.fillStyle = 'rgba(255,107,0,.88)';
+    ctx.font = `${Math.round(W*.026)}px Cinzel, serif`;
+    ctx.textAlign = 'center';
+    ctx.fillText('▸  P R O F E C Í A  R E V E L A D A  ◂', W/2, H*.66);
+
+    // Prophecy title
+    const lines = prophecyText.split('\n');
+    ctx.fillStyle = '#e8c87a';
+    ctx.shadowColor = 'rgba(200,169,110,.55)';
+    ctx.shadowBlur = 12;
+    const titleSize = Math.round(W * .068);
+    ctx.font = `900 ${titleSize}px Cinzel, serif`;
+    lines.forEach((line,i) => ctx.fillText(line, W/2, H*.75 + i*titleSize*1.2));
+    ctx.shadowBlur = 0;
+
+    // Divider line
+    const dvY = H*.91;
+    const dvG = ctx.createLinearGradient(W*.15,0,W*.85,0);
+    dvG.addColorStop(0,'transparent'); dvG.addColorStop(.5,'rgba(200,169,110,.55)'); dvG.addColorStop(1,'transparent');
+    ctx.strokeStyle=dvG; ctx.lineWidth=.8;
+    ctx.beginPath(); ctx.moveTo(W*.15,dvY); ctx.lineTo(W*.85,dvY); ctx.stroke();
+
+    // Career name
+    ctx.fillStyle='rgba(255,153,51,.85)';
+    ctx.font=`600 ${Math.round(W*.029)}px Cinzel, serif`;
+    ctx.fillText(careerName, W/2, H*.965);
   };
   img.src = capturedPhotoDataURL;
 }
@@ -720,15 +711,13 @@ function invokeOracle(){
 
 function showResult(key){
   const c=careers[key];
-  // Photo overlay text hidden — prophecy and career shown in card-body below photo
+  document.getElementById('res-career').textContent=c.name;
+  document.getElementById('res-quote').textContent=c.quote;
+  // Hide HTML overlay text — prophecy title is drawn directly on canvas
   document.getElementById('photo-overlay-text').style.display='none';
-  // Populate card text
-  document.getElementById('res-prophecy').innerText = c.prophecy;
-  document.getElementById('res-career').textContent  = c.name;
-  document.getElementById('res-quote').textContent   = c.quote;
   renderPhotoToCard(c.prophecy, c.name);
   document.getElementById('result-overlay').classList.add('show');
-  hudTop.textContent='✦ La profecía ha sido revelada ✦'; hudTop.style.color='#ff9933';
+  hudTop.textContent='✦ La profecía ha sido revelada ✦';hudTop.style.color='#ff9933';
 }
 
 function closeResult(){
