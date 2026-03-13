@@ -707,11 +707,11 @@ function invokeOracle(){
   const phrase=ritualPhrases[Math.floor(Math.random()*ritualPhrases.length)];
   const sequence=[
     {t:0,    phase:'Abriendo el ojo del oráculo...', text:''},
-    {t:1800, phase:'Las visiones toman forma...', text:phrase},
-    {t:4500, phase:'Leyendo los patrones eternos...', text:''},
-    {t:6200, phase:'El destino cristaliza en la arena...', text:'«Quien controla la especería,\ncontrola el universo.\nTú controlarás mucho más.»'},
-    {t:9000, phase:'La profecía emerge del tiempo...', text:''},
-    {t:10500,phase:'✦ Un camino es elegido ✦', text:''},
+    {t:1500, phase:'Las visiones toman forma...', text:''},
+    {t:3000, phase:'Leyendo los patrones eternos...', text:''},
+    {t:4500, phase:'El destino cristaliza en la arena...', text:''},
+    {t:6000, phase:'La profecía emerge del tiempo...', text:''},
+    {t:7500,phase:'✦ Un camino es elegido ✦', text:''},
   ];
 
   sequence.forEach(({t,phase,text})=>{
@@ -725,7 +725,7 @@ function invokeOracle(){
     },t);
   });
 
-  setTimeout(()=>{eyeTarget=0;},10800);
+  setTimeout(()=>{eyeTarget=0;},9000);
 
   const chosen=careerKeys[Math.floor(Math.random()*careerKeys.length)];
 
