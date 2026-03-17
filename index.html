@@ -708,10 +708,7 @@ function invokeOracle(){
   const sequence=[
     {t:0,    phase:'Abriendo el ojo del oráculo...', text:''},
     {t:1500, phase:'Las visiones toman forma...', text:''},
-    {t:3000, phase:'Leyendo los patrones eternos...', text:''},
-    {t:4500, phase:'El destino cristaliza en la arena...', text:''},
-    {t:6000, phase:'La profecía emerge del tiempo...', text:''},
-    {t:7500,phase:'✦ Un camino es elegido ✦', text:''},
+    {t:3000,phase:'✦ Un camino es elegido ✦', text:''},
   ];
 
   sequence.forEach(({t,phase,text})=>{
@@ -725,7 +722,7 @@ function invokeOracle(){
     },t);
   });
 
-  setTimeout(()=>{eyeTarget=0;},9000);
+  setTimeout(()=>{eyeTarget=0;},5000);
 
   const chosen=careerKeys[Math.floor(Math.random()*careerKeys.length)];
 
@@ -733,7 +730,7 @@ function invokeOracle(){
     ritualRunning=false;
     overlay.classList.remove('show');
     setTimeout(()=>showResult(chosen),400);
-  },11800);
+  },5000);
 }
 
 function showResult(key){
